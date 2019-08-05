@@ -25,8 +25,9 @@ export class App {
     this._table = new Table({
       data: this._data,
       element: this._el.querySelector('[data-element=table]'),
-      onRowClick: (item) => this._tradeItem(item),
     });
+
+    this._table.on('rowClick', e => this._tradeItem(e.detail));
   }
 
   _initPortfolio() {
@@ -40,6 +41,10 @@ export class App {
     this._tradeWidget = new TradeWidget({
       element: this._el.querySelector('[data-element="trade-widget"]'),
     });
+
+    this._tradeWidget.on('buy', e => {
+      console.log(e.detail)
+    })
   }
 
   _render() {

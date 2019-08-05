@@ -1,18 +1,27 @@
-export class Table {
-  constructor({ element, data, onRowClick }) {
+import { Component } from '../Component/Component.js';
+
+export class Table extends Component {
+  constructor({ element, data }) {
+    super();
     this._el = element;
-    this._onRowClickCallback = onRowClick;
     this._render(data);
 
     this._el.addEventListener('click', e => this._onRowClick(e));
   }
 
   _onRowClick(e) {
-    const target = e.target.closest('tr');
+    const target = e.target.closest('tbody tr');
     if (!target) return;
 
     const id = target.dataset.id;
-    this._onRowClickCallback(id);
+    if (id) {
+      let clickEvent = new CustomEvent('rowClick', {
+        detail: id,
+      });
+      this._el.dispatchEvent(clickEvent);
+    }
+
+
   }
 
   _render(data) {

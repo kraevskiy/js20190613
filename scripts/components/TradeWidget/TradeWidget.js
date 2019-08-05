@@ -1,11 +1,36 @@
-export class TradeWidget {
+import { Component } from '../Component/Component.js';
+
+export class TradeWidget extends Component {
   constructor({ element }) {
+    super();
     this._el = element;
 
     this._el.addEventListener('input', e => {
       const value = +e.target.value;
       this._updateDisplay(value);
     })
+
+    this._el.addEventListener('click', e => {
+      e.preventDefault();
+
+      if (e.target.closest('[data-action=close]')) {
+        this.close();
+      }
+
+      if (e.target.closest('[data-action=buy]')) {
+        let buyEvent = new CustomEvent('buy', {
+          detail: {
+            item: this._currentItem,
+            amount: +this._el.querySelector('#amount').value,
+          }
+        })
+        this._el.dispatchEvent(buyEvent);
+      }
+    })
+  }
+
+  close() {
+    this._el.querySelector('.modal').classList.remove('open');
   }
 
   trade(item) {
@@ -39,8 +64,8 @@ export class TradeWidget {
           </div>
           
           <div class="modal-footer">
-            <a href="#!" class="modal-close waves-effect waves-teal btn-flat">Buy</a>
-            <a href="#!" class="modal-close waves-effect waves-teal btn-flat">Cancel</a>
+            <a href="#!" data-action="buy" class="modal-close waves-effect waves-teal btn-flat">Buy</a>
+            <a href="#!" data-action="close" class="modal-close waves-effect waves-teal btn-flat">Cancel</a>
           </div>
       </div>
     `;
