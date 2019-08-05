@@ -5,6 +5,16 @@ export class TradeWidget extends Component {
     super();
     this._el = element;
 
+    this._el.addEventListener('keydown', e => {
+      if (!e.target.closest('#amount')) return;
+
+      const { key } = e;
+      if (!isNumeric(key) && key !== 'Backspace' && key !== '.') {
+        e.preventDefault();
+      }
+
+    })
+
     this._el.addEventListener('input', e => {
       const value = +e.target.value;
       this._updateDisplay(value);
@@ -25,6 +35,7 @@ export class TradeWidget extends Component {
           }
         })
         this._el.dispatchEvent(buyEvent);
+        this.close();
       }
     })
   }
@@ -72,4 +83,8 @@ export class TradeWidget extends Component {
     let elems = this._el.querySelectorAll('.collapsible');
     M.Collapsible.init(elems);
   }
+}
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
 }
