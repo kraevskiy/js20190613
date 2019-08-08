@@ -3,20 +3,25 @@ const getSingleCoinUrl = id => `${COINS_URL}/${id}/ohlcv/latest`;
 
 
 const HttpService = {
-  sendRequest(url, successCallback, method = 'GET') {
+  sendRequest(url, successCallback, errorCallback) {
     const xhr = new XMLHttpRequest();
 
-    xhr.open(method, url);
+    xhr.open('GET', url);
 
     xhr.send();
 
     xhr.onload = () => {
       if (xhr.status != 200) {
-        alert( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
+        errorCallback(new Error(xhr.statusText));
+        return;
       } else {
         let responseData = JSON.parse(xhr.responseText);
         successCallback(responseData);
       }
+    }
+
+    xhr.onerror = () => {
+      errorCallback(xhr.statusText);
     }
   },
 
@@ -39,18 +44,8 @@ const HttpService = {
 
 export const DataService = {
   _sendRequest(url) {
-    let promise = {
-      _successCallbacks: [],
-      _resolve(data) {
-        this._successCallbacks.forEach(callback => callback(data));
-      },
-      then(successCallback) {
-        this._successCallbacks.push(successCallback);
-      },
-    };
-
-    HttpService.sendRequest(url, data => {
-      promise._resolve(data);
+    let promise = new MyPromise((resolve, reject) => {
+      HttpService.sendRequest(url, resolve, reject);
     });
 
     return promise;
@@ -63,10 +58,19 @@ export const DataService = {
     // });
 
     let promise = this._sendRequest(COINS_URL);
-    
+
     promise.then(data => {
+      console.log('sync cb')
       console.log(data);
+    }, err => {
+      console.error(err);
+    });
+
+
+    promise.catch(err => {
+      console.error(err);
     })
+
   },
  
   getCurrenciesPrices(data, callback) {
@@ -89,5 +93,45 @@ export const DataService = {
       callback(dataWithPrices);
     })
   }
+}
 
+class MyPromise {
+  constructor(behaviorFunction) {
+    this._status = 'pending';
+    this._result = null;
+    this._successCallbacks = [];
+    this._errorCallbacks = [];
+    behaviorFunction(this._resolve.bind(this), this._reject.bind(this));
+  }
+  
+  then(successCallback, errorCallback = () => {}) {
+    if (this._status === 'fulfilled') {
+      successCallback(this._result);
+    } else if (this._status === 'rejected') {
+      errorCallback(this._result);
+    } else {
+      this._successCallbacks.push(successCallback);
+      this._errorCallbacks.push(errorCallback);
+    }
+  }
+
+  _resolve(data) {
+    this._status = 'fulfilled';
+    this._result = data;
+    this._successCallbacks.forEach(callback => callback(data));
+  }
+
+  catch(errorCallback) {
+    if (this._status === 'rejected') {
+      errorCallback(this._result);
+    } else {
+      this._errorCallbacks.push(errorCallback);
+    }
+  }
+
+  _reject(error) {
+    this._status = 'rejected';
+    this._result = error;
+    this._errorCallbacks.forEach(callback => callback(error));
+  }
 }
