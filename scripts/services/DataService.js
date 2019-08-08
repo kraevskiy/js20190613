@@ -38,11 +38,35 @@ const HttpService = {
 };
 
 export const DataService = {
-  getCurrencies(callback) {
-    HttpService.sendRequest(COINS_URL, data => {
-      data = data.slice(0, 10);
-      DataService.getCurrenciesPrices(data, callback);
+  _sendRequest(url) {
+    let promise = {
+      _successCallbacks: [],
+      _resolve(data) {
+        this._successCallbacks.forEach(callback => callback(data));
+      },
+      then(successCallback) {
+        this._successCallbacks.push(successCallback);
+      },
+    };
+
+    HttpService.sendRequest(url, data => {
+      promise._resolve(data);
     });
+
+    return promise;
+  },
+
+  getCurrencies(callback) {
+    // HttpService.sendRequest(COINS_URL, data => {
+    //   data = data.slice(0, 10);
+    //   DataService.getCurrenciesPrices(data, callback);
+    // });
+
+    let promise = this._sendRequest(COINS_URL);
+    
+    promise.then(data => {
+      console.log(data);
+    })
   },
  
   getCurrenciesPrices(data, callback) {
@@ -64,9 +88,6 @@ export const DataService = {
 
       callback(dataWithPrices);
     })
-
-
-    // console.log(coinsIdMap)
   }
 
 }
