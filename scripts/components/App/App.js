@@ -9,10 +9,15 @@ export class App {
     this._userBalance = 10000;
     this._render();
 
-    DataService.getCurrencies(data => {
+    DataService.getCurrencies().then(data => {
       this._data = data;
       this._initTable();
-    });
+    })
+
+    // DataService.getCurrencies(data => {
+    //   this._data = data;
+    //   this._initTable();
+    // });
 
     this._initPortfolio();
     this._initTradeWidget();

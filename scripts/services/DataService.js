@@ -3,42 +3,47 @@ const getSingleCoinUrl = id => `${COINS_URL}/${id}/ohlcv/latest`;
 
 
 const HttpService = {
-  sendRequest(url, successCallback, errorCallback) {
-    const xhr = new XMLHttpRequest();
+  sendRequest(url) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
 
-    xhr.open('GET', url);
+      xhr.open('GET', url);
 
-    xhr.send();
+      xhr.send();
 
-    xhr.onload = () => {
-      if (xhr.status != 200) {
-        errorCallback(new Error(xhr.statusText));
-        return;
-      } else {
-        let responseData = JSON.parse(xhr.responseText);
-        successCallback(responseData);
+      xhr.onload = () => {
+        if (xhr.status != 200) {
+          reject(new Error(xhr.statusText));
+          return;
+        } else {
+          let responseData = JSON.parse(xhr.responseText);
+          resolve(responseData);
+        }
       }
-    }
 
-    xhr.onerror = () => {
-      errorCallback(xhr.statusText);
-    }
+      xhr.onerror = () => {
+        reject(xhr.statusText);
+      }
+    })
   },
 
-  sendMultipleRequests(urls, callback) {
-    let requestCount = urls.length;
-    let results = [];
+  sendMultipleRequests(urls) {
+    let requests = urls.map(url => HttpService.sendRequest(url));
+    return Promise.all(requests);
 
-    urls.forEach(url => {
-      HttpService.sendRequest(url, data => {
-        results.push({ url, data });
-        requestCount--;
+    // let requestCount = urls.length;
+    // let results = [];
 
-        if (!requestCount) {
-          callback(results);
-        }
-      })
-    })
+    // urls.forEach(url => {
+    //   HttpService.sendRequest(url, data => {
+    //     results.push({ url, data });
+    //     requestCount--;
+
+    //     if (!requestCount) {
+    //       callback(results);
+    //     }
+    //   })
+    // })
   }
 };
 
@@ -51,47 +56,49 @@ export const DataService = {
     return promise;
   },
 
-  getCurrencies(callback) {
+  getCurrencies() {
     // HttpService.sendRequest(COINS_URL, data => {
     //   data = data.slice(0, 10);
     //   DataService.getCurrenciesPrices(data, callback);
     // });
 
-    let promise = this._sendRequest(COINS_URL);
+    let promise = HttpService.sendRequest(COINS_URL);
 
-    promise.then(data => {
-      console.log('sync cb')
-      console.log(data);
-    }, err => {
+    return promise.then(data => {
+      data = data.slice(0, 10);
+      return DataService.getCurrenciesPrices(data);
+    }).catch(err => {
       console.error(err);
     });
-
-
-    promise.catch(err => {
-      console.error(err);
-    })
-
   },
  
-  getCurrenciesPrices(data, callback) {
-    let coinsIds = data.map(coin => coin.id);
+  getCurrenciesPrices(data) {
+    let coinsUrls = data.map(coin => getSingleCoinUrl(coin.id));
 
-    const coinsIdMap = coinsIds.reduce((acc, id) => {
-      acc[getSingleCoinUrl(id)] = id;
-      return acc;
-    }, {});
-
-    HttpService.sendMultipleRequests(Object.keys(coinsIdMap), coins => {
-      const dataWithPrices = data.map(coinData => {
-        let coinPriceUrl = getSingleCoinUrl(coinData.id);
-        let [coindPriceData] = coins.find(coin => coin.url === coinPriceUrl).data;
-
-        coinData.price = coindPriceData.close;
-        return coinData;
+    return HttpService.sendMultipleRequests(coinsUrls).then(coins => {
+      const dataWithPrice = data.map((item, index) => {
+        item.price = coins[index][0].close;
+        return item;
       });
-
-      callback(dataWithPrices);
+      
+      return dataWithPrice;
     })
+    // const coinsIdMap = coinsIds.reduce((acc, id) => {
+    //   acc[getSingleCoinUrl(id)] = id;
+    //   return acc;
+    // }, {});
+
+    // HttpService.sendMultipleRequests(Object.keys(coinsIdMap), coins => {
+    //   const dataWithPrices = data.map(coinData => {
+    //     let coinPriceUrl = getSingleCoinUrl(coinData.id);
+    //     let [coindPriceData] = coins.find(coin => coin.url === coinPriceUrl).data;
+
+    //     coinData.price = coindPriceData.close;
+    //     return coinData;
+    //   });
+
+    //   callback(dataWithPrices);
+    // })
   }
 }
 
