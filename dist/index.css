@@ -1,0 +1,41 @@
+html, body {
+    height: 100%;
+}
+
+#app {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.row {
+    width: 100%;
+}
+
+tr td {
+    cursor: pointer;
+}
+
+.modal.open {
+    z-index: 1003;
+    display: block;
+    opacity: 1;
+    top: 30%;
+    transform: scaleX(1) scaleY(1);
+}
+
+.portfolio-row {
+    margin-bottom: auto;
+}
+
+form, form > div {
+    padding-left: 0 !important;
+}
+
+[data-element="portfolio"] {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background-color: white;
+}

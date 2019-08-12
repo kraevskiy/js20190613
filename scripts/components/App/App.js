@@ -14,7 +14,7 @@ export class App {
       this._data = data;
       this._initTable();
       this._initFilter();
-    })
+    });
 
     // DataService.getCurrencies(data => {
     //   this._data = data;
