@@ -1,26 +1,28 @@
 export const HttpService = {
   sendRequest(url) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
+    return fetch(url).then(res => res.json());
 
-      xhr.open('GET', url);
+    // return new Promise((resolve, reject) => {
+    //   const xhr = new XMLHttpRequest();
 
-      xhr.send();
+    //   xhr.open('GET', url);
 
-      xhr.onload = () => {
-        if (xhr.status != 200) {
-          reject(new Error(xhr.statusText));
-          return;
-        } else {
-          let responseData = JSON.parse(xhr.responseText);
-          resolve(responseData);
-        }
-      }
+    //   xhr.send();
 
-      xhr.onerror = () => {
-        reject(xhr.statusText);
-      }
-    })
+    //   xhr.onload = () => {
+    //     if (xhr.status != 200) {
+    //       reject(new Error(xhr.statusText));
+    //       return;
+    //     } else {
+    //       let responseData = JSON.parse(xhr.responseText);
+    //       resolve(responseData);
+    //     }
+    //   }
+
+    //   xhr.onerror = () => {
+    //     reject(xhr.statusText);
+    //   }
+    // })
   },
 
   sendMultipleRequests(urls) {
