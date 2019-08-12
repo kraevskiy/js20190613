@@ -4,6 +4,8 @@ import { TradeWidget } from '../TradeWidget/TradeWidget.js';
 import { DataService } from '../../services/DataService.js';
 import { Filter } from '../Filter/Filter.js';
 
+import './App.css';
+
 export class App {
   constructor({ element }) {
     this._el = element;

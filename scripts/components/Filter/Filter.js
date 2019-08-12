@@ -1,3 +1,4 @@
+import { debounce } from 'debounce';
 import { Component } from '../Component/Component.js';
 
 export class Filter extends Component {
@@ -26,11 +27,11 @@ export class Filter extends Component {
   }
 }
 
-function debounce(f, delay) {
-  let timerId;
+// function debounce(f, delay) {
+//   let timerId;
 
-  return function wrapper(...args) {
-    clearTimeout(timerId);
-    timerId = setTimeout(() => { f.apply(this, args); }, delay);
-  }
-}
+//   return function wrapper(...args) {
+//     clearTimeout(timerId);
+//     timerId = setTimeout(() => { f.apply(this, args); }, delay);
+//   }
+// }
