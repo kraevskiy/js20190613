@@ -44,12 +44,11 @@ export class App {
       element: this._el.querySelector('[data-element=filter]'),
     })
 
-    this._filter.on('filter', e => {
+    this._filter.on('filter', async e => {
       const filterValue = e.detail;
-      DataService.getCurrencies({ filter: filterValue })
-        .then(data => {
-          this._table.update(data);
-        })
+
+      const filteredData = await DataService.getCurrencies({ filter: filterValue });
+      this._table.update(filteredData);
     })
   }
 
