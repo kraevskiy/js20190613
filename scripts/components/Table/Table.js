@@ -20,8 +20,10 @@ export class Table extends Component {
       });
       this._el.dispatchEvent(clickEvent);
     }
+  }
 
-
+  update(data) {
+    this._render(data);
   }
 
   _render(data) {

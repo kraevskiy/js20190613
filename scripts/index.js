@@ -4,3 +4,4 @@ new App({
   element: document.getElementById('app')
 })
 
+console.log(1)
